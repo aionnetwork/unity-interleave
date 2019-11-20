@@ -1,0 +1,75 @@
+\documentclass{article}
+
+% imports
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{algorithm}% http://ctan.org/pkg/algorithms
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{caption}
+\usepackage{subfig}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage[acronym]{glossaries}
+
+%\usepackage{draftwatermark}
+
+% watermark
+
+%\SetWatermarkText{DRAFT}
+%\SetWatermarkScale{5}
+
+% globals
+\captionsetup{width=.9\linewidth}
+
+% do-while code
+\algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}
+
+% Name is tentative
+\title{An Interleaving Hybrid Consensus Protocol}
+\author{Open Foundation Engineering Team}
+\date{November 20, 2019}
+
+% setting up glossary
+\makeglossaries
+\loadglsentries{glossary}
+
+\begin{document}
+
+% title
+\maketitle
+
+% abstract
+\begin{abstract}
+    We introduce Unity Interleave, a new consensus algorithm for public blockchain settings.
+    It is an eventual consistency protocol merging the Proof-of-Work (PoW) and Proof-of-Stake (PoS)
+    into a coherent stochastic process. It builds upon research previously done for the Unity
+    protocol, improving security while maintaining fairness and scalability.
+\end{abstract}
+
+\section*{Acknowledgements}
+
+This specification was produced in collaboration with the entire R\&D staff at the Open Foundation, with major contributions from Aayush Rajasekaran, Yao Sun, Ali Sharif, Ge Zhong, Jeff Disher, Shidokht Hejazi, Sam Pajot-Phipps, Yunfei Zha and Alexandra Roatis.
+
+% ToC
+\newpage
+\tableofcontents
+\newpage
+
+% paper body
+
+\input{sections/1introduction-related.tex}
+\input{sections/2background.tex}
+\input{sections/3definition.tex}
+\input{sections/4analysis.tex}
+\input{sections/5results.tex}
+\input{sections/6future-works-conclusion.tex}
+
+% references, appendices, glossaries
+
+\pagebreak
+\bibliographystyle{alpha}
+\bibliography{paper}
+
+\end{document}

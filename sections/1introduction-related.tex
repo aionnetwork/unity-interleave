@@ -1,0 +1,41 @@
+\section{Introduction}
+\label{intro}
+
+The idea of \emph{Proof of Work (PoW)} originated in the work of Dwork and Naor
+in the 1990s\cite{dwork-naor}. Used in the majority of blockchain protocols today, including
+Bitcoin, the idea is that a block can only be considered valid if it includes
+a solution to some cryptographic puzzle that is hard to solve, but easy to verify. 
+Block producers on a PoW network are often called \emph{miners}, and 
+the security of a PoW network relies on the difficulty of finding solutions
+to these puzzles. For more on PoW consensus, see \cite{nakamoto2008}.
+
+A PoW network is considered to be secure if a large percentage of the hash power
+solving these puzzles is controlled by honest actors (usually stated as 51\% of the hash power,
+though the number can be as high as 66\% \cite{selfish_mining}). 
+The rise of large mining pools \cite{aliaga2018}, as well as the new possibility of renting
+hash power makes it easier for a single entity to acquire large quantities of hash power,
+especially on less well-secured networks. This revokes previous assumptions around
+the security of blockchains, leaving smaller non-ASIC networks especially vulnerable \cite{sinnige2018}.
+
+An alternative approach known as \emph{Proof-of-Stake (PoS)} encompasses a broad spectrum of
+consensus protocols that share the common attribute in utilizing the \textit{stake} a user has in a network \cite{BentovGM14}.
+Block producers on a PoS network are often called \emph{stakers}, and 
+this stake is usually some economic asset that lives on the network itself.
+The security of networks built on PoS consensus relies on incentivising block producers
+to support the network they are on (since they have assets on the network), and by 
+punishing behaviour that can be shown to be dishonest (by confiscating the assets of
+a dishonest actor). PoS networks are vulnerable to a different set of attacks than PoW networks,
+see \cite{brown2018formal} for more.
+
+In this paper, we present a new consensus protocol that combines the ideas
+of PoW and PoS. This protocol, which we call ``Unity-Interleave'', is a modification
+of the protocol described in \cite{wu2019unifying}.
+The approach is to simply alternate between PoW and PoS blocks; a miner
+cannot produce a PoW block on top of another PoW block, and the same is
+true of stakers and PoS blocks. We strive to achieve the benefits of both PoW and
+PoS protocols, while ameliorating the vulnerabilities of these protocols.
+
+\textbf{Paper Layout.} In \S\ref{background} we go over some of the background of blockchain technology.
+\S\ref{unity} defines the protocol itself in detail, and \S\ref{analysis} 
+analyses the protocol's resistance to various attacks. Finally, in \S\ref{results},
+we present the results of some simulations that prove our protocol works as desired.
