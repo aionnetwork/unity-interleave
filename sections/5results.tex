@@ -1,11 +1,9 @@
-\section{Results}
+\section{Simulation Results}
 \label{results}
 
-We present empirical findings from both simulation and test network (Amity) data
-to verify the behaviour of the algorithm. The next few sections are laid out as
-follows: we pick a property of the protocol that we're interested in verify and
-present simulation results to depict the behaviour. Following that we present 
-(if applicable) results from the test net depicting the same behaviour.
+We present empirical findings from both simulation and public test network (Amity) data to verify the behaviour of the algorithm. In the following presentation, we verify key system properties by corroborating simulation results with  s
+
+e pick a property of the protocol that we're interested in verify and present simulation results to depict the behaviour. When applicable, we present results from the test network.
 
 \subsection{Setup}
 
@@ -17,20 +15,16 @@ or the PoW and PoS blocks.
 
 For the purposes of some experiments, we generate the block generation scheme
 for the honest party and observe results. For others, we simulate both parties. This
-is done by allotting both parties with a time interval, and running a running a
+is done by allotting both parties with a time interval, and running a
 random walk following the rules of the protocol. In scenarios where we want to
 observe attacker success rate (for example, in the case of the double spend), we
 repeatedly run a random walk to observe success rates at various power ratios.
 
 \subsection{Block Generation Fairness}
 
-We start with examining block generation fairness, by examining a few scenarios,
-we examine through simulation the base case of two players, one with static
-hash rate and voting power, another that we will vary and examine. For these
-simulation we always assume the network is in a \textbf{steady state}. We define
-a steady state as the following, given $H$ is the network total hashing power,
-and $V$ is the network total voting power. Then steady state is when these two
-variables are constant, and $d_s = V \cdot T$, $d_w = H \cdot T$.
+We start with examining block generation fairness, by examining the base case of two players, an honest player with static hash rate and voting power, and an attacker with variable quantities. For this simulation we always assume the network is in a \textit{steady state}. We define a steady state as the following, given $H$ is the network total hashing power, and $V$ is the network total voting power. Then steady state is when these two variables are constant, and $d_s = V \cdot T$, $d_w = H \cdot T$.
+
+We examine the block production with a time allotment of 30 days. Figure \ref{tab:table_block_fairness} summarizes the cases analyzed and simulation results. 
 
 \begin{figure}[h]
     \centering
@@ -63,30 +57,42 @@ variables are constant, and $d_s = V \cdot T$, $d_w = H \cdot T$.
     \label{tab:table_block_fairness}
 \end{figure}
 
-We examine the block production with a time allotment of 30 days, the results are
-depicted in figure \ref{tab:table_block_fairness}. We examine two cases here: First, when
-the examined player has equal hashing and voting power (same resource) with the other. In this case the
-expected rewards for both players should be identical. We see this is true in the \textbf{Equal
-Power Scenario} as block production for both sides are identical.
-
-Second, we examine a scenario where the examined player has majority dominance in one resource,
-expectation is that one resource can at most only obtain 50\% of the rewards due to the interleaving
-structure of the blockchain. The percentage of blocks mined (at steady state) should
-on average be,
+First, we examine the case where both players have equal hashing and voting power. In this case the expected rewards for both players should be identical. We see this is true in the \textit{equal power scenario} as block production for both sides are identical. In scenarios two and three, we study the case where the attacker has majority dominance in one of the two resources. The expectation is that one resource can at most only obtain 50\% of the rewards due to the interleaving structure of the blockchain. The percentage of blocks produced (at steady state) should on average be:
 
 \begin{equation}
-    P(win) = \frac{1}{2}v_i/\sum_i{v_i} + \frac{1}{2}h_i/\sum_i{h_i}
+    P(win) = \frac{1}{2}v_i/\sum_i{v_i} + \frac{1}{2}h_i/\sum_i{h_i}.
 \end{equation}
 
-in examples two and three, in which the examined player had twice the hash rate and voting power.
-In both cases, they produced blocks as expected according to our probability equation.
+In both cases, the attacker produced blocks as predicted by the above equation.
 
 \subsection{Block Time Distribution}
 
 Then, we look at the block time distribution based on our simulation. As described earlier, the protocol
 difficulty adjustment function targets a mean block time of $T$ seconds, which is set in the simulations
-and on Amity to be 10 seconds. The distribution of PoS/PoW/All block deltas fits well the exponential distribution, as shown in
-figure \ref{fig:pos_pow_delta_histogram}.
+and on Amity to be 10 seconds. Figure \ref{fig:pos_pow_delta_histogram} demonstrates that at steady state, the two generation algorithms exhibit extremely similar exponential PDFs, with $\lambda = \frac{1}{10}$ (rate) (as conjectured in \ref{difficulty_adjustment}). 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.55\linewidth]{assets/sim_results/block_delta_histogram_steady_state.pdf}
+    \caption{Histogram for PoW \& PoS block generation (100 bins with 1 second spacing), in \textit{steady-state} setting.}
+    \label{fig:pos_pow_delta_histogram}
+\end{figure}
+
+
+Figure \ref{fig:delta_histogram} demonstrates that simulation results are a fair representation of reality. We attribute the differences in results to the effects of network delay and propagation, and the fact that the sampling range included portions in which $V$ and $H$ fluctuated.
+
+\begin{figure}[h]
+    \centering
+    \subfloat[PoW]{{\includegraphics[width=0.45\linewidth]{assets/sim_results/pow_block_delta_histogram.pdf} }}
+    \qquad
+    \subfloat[PoS]{{\includegraphics[width=0.45\linewidth]{assets/sim_results/pos_block_delta_histogram.pdf} }}
+    \caption{Density histogram of simulated block deltas, vs. data from Amity (10000 consecutive blocks).}
+    \label{fig:delta_histogram}
+\end{figure}
+
+Also plotted on each graph is the theoretical distribution, the PDF of the exponential distribution with
+the corresponding rate. It is obvious then that the expected mean and variance should be around 10 seconds.
+The results listed in figure \ref{fig:block_time_mean_std} support this fact. We do note that there is higher variance on the live network, again this can be attributed to the increase in noise due to network propagation delays, and fluctuating resources.
 
 \begin{figure}[h]
     \centering
@@ -96,51 +102,28 @@ figure \ref{fig:pos_pow_delta_histogram}.
         \hline
         & Mean & Standard Deviation \\
         \hline
-        Simulations PoW & 10.1965 & 10.6469 \\
-        Simulations PoS & 10.1174 & 10.3223 \\
+        Simulation PoW & 10.1965 & 10.6469 \\
+        Simulation PoS & 10.1174 & 10.3223 \\
         Amity PoW & 9.6748 & 11.5929 \\
         Amity PoS & 9.8408 & 10.2822 \\
         \hline
     \end{tabular}
-    \caption{Caption}
+    \caption{Block production rate statistics in simulation and Amity test network settings.}
     \label{fig:block_time_mean_std}
 \end{figure}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.55\linewidth]{assets/sim_results/block_delta_histogram_steady_state.pdf}
-    \caption{Histogram of PoW and PoS block generation at
-    steady state (without perturbation of hashing or voting power). This plot was
-    generated using 100 bins with 1 second spacing. We conclude that at steady
-    state, the two generation algorithms exhibit extremely similar exponential
-    PDFs, with $\lambda = \frac{1}{10}$ (rate).}
-    \label{fig:pos_pow_delta_histogram}
-\end{figure}
-
-\begin{figure}[h]
-    \centering
-    \subfloat[PoW]{{\includegraphics[width=0.45\linewidth]{assets/sim_results/pow_block_delta_histogram.pdf} }}
-    \qquad
-    \subfloat[PoS]{{\includegraphics[width=0.45\linewidth]{assets/sim_results/pos_block_delta_histogram.pdf} }}
-    \caption{Density histogram of simulated block deltas, vs. data from Amity. Data was retrieved from a set of 10000 consecutive blocks, starting from block 300.}
-    \label{fig:delta_histogram}
-\end{figure}
-
-We also verify that similar behaviour is shown on the live Amity network, these results show us
-that the simulation results are somewhat representative of reality as seen by their similarities
-in figure \ref{fig:delta_histogram}. We attribute
-the differences in results to the effects of network delay and propagation, and the fact that the sampling
-range included portions in which $V$ and $H$ fluctuated.
-
-Also plotted on each graph is the theoretical distribution, the PDF of the exponential distribution with
-the corresponding rate. It is obvious then that the expected mean and variance should be around 10 seconds.
-The results listed in figure \ref{fig:block_time_mean_std} support this fact. We do note that there is higher variance
-on the live network, again this can be attributed to the increase in noise due to network propagation
-delays, and fluctuating resources.
 
 \subsection{Difficulty Adjustment}
 
-\begin{figure}
+Difficulty adjustment is tuned in the protocol to be more aggressive than the previous implementation,
+that largely follows a retargeted version of the difficulty adjustment algorithm
+introduced in \cite{wood2014ethereum}. Additionally, it is tuned specifically to target a
+10 second block time, whereas the previous algorithm targeted a specific range. As depicted
+in figures \ref{fig:pow_block_difficulty} and \ref{fig:pos_block_difficulty}, the 
+adjustment algorithm can properly target the desired block time, and reaches
+the expected difficulty of the network.
+
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.55\linewidth]{assets/sim_results/pos_10000_difficulty.pdf}
     \caption{PoS difficulty over 10000 blocks. The simulation results represent
@@ -151,7 +134,7 @@ delays, and fluctuating resources.
     \label{fig:pos_block_difficulty}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.55\linewidth]{assets/sim_results/pow_10000_difficulty.pdf}
     \caption{PoW difficulty over 10000 blocks, at steady state. The parameters used
@@ -159,11 +142,3 @@ delays, and fluctuating resources.
     difficulty = 5027743.}
     \label{fig:pow_block_difficulty}
 \end{figure}
-
-Difficulty adjustment is tuned in the protocol to be more aggressive than the previous implementation,
-that largely follows a retargeted version of the difficulty adjustment algorithm
-introduced in \cite{wood2014ethereum}. Additionally, it is tuned specifically to target a
-10 second block time, whereas the previous algorithm targeted a specific range. As depicted
-in figures \ref{fig:pow_block_difficulty} and \ref{fig:pos_block_difficulty}, the 
-adjustment algorithm can properly target the desired block time, and reaches
-the expected difficulty of the network.

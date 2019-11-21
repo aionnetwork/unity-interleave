@@ -1,27 +1,7 @@
 \section{Background}
 \label{background}
 
-% -----------------------------------------------------
+Assumed a simplified model for a blockchain consisting of \textit{blocks} and \textit{transactions}. Assume each transaction is some arbitrary unique token (e.g. a unique 32-byte hash), and each block is a data structure that
+bundles an ordered series of transactions. As with earlier blockchain protocols, blocks in this scheme must reference a valid, previously published unique block (commonly referred to as a parent). See \cite{wood2014ethereum} for a more complete model for a blockchain. 
 
-The underlying organizational constructs that this protocol utilizes is based upon
-those defined in \cite{wood2014ethereum} \S2. This organizational model defines
-that are reused in our protocol, these constructs are the \textit{transaction} and
-the \textit{block}. For the purposes of this paper, we view a transaction as
-unique tokens (ex. a unique 32-byte hash), and a block as a data structure that
-bundles an ordered series of transactions. As with earlier blockchain protocols,
-blocks in this scheme must reference a valid, previously published unique block
-(commonly referred to as a parent).
-
-The purpose of Proof of Work is to provide an easily verifiable cryptographic proof
-that a certain amount of work has been done. It is used by the protocol to generate
-the notion of \textit{difficulty}, in that proofs generated from a block with higher
-difficulty require more computational resources than that of a lower difficulty.
-Therefore, difficulty is a measure of total \textit{work} done to produce a block.
-This numerical value in turn can be utilized to determine the link of blocks that
-represent the chain with the \textit{most work} via summation, among other approaches
-(this paper included) in agreement on a canonical chain. This in turn enforces agreement
-on a canonical ordering of transactions, which forms the basis for all blockchain interactions.
-
-
-
-% -----------------------------------------------------
+The purpose of Proof of Work (\cite{nakamoto2008}) is to provide an easily verifiable cryptographic proof that a certain amount of work has been done. It is used by the protocol to generate the notion of \textit{difficulty}, in that proofs generated from a block with higher difficulty require more computational resources than that of a lower difficulty. Therefore, difficulty is a measure of total \textit{work} done to produce a block. This numerical value in turn can be utilized to determine the link of blocks that represent the chain with the \textit{most work} via summation, among other approaches (this paper included) in agreement on a canonical chain. This in turn enforces agreement on a canonical ordering of transactions, which forms the basis for all blockchain interactions.

@@ -1,113 +1,63 @@
 \section{Analysis}
 \label{analysis}
 
-In this section, we assess the protocol's resistance to various attacks. We claim that
-in most cases, the protocol behaves no worse than a pure PoW network. 
+In this section, we assess the protocol's resistance to various attacks. We claim that in most cases, the protocol behaves no worse than a pure PoW network. 
 
 \subsection{Double-spend attack}
 \label{double_spend_attack}
 
-The \textit{double-spend attack}
-is the well-known, but somewhat poorly named, ``51\% attack'' \cite{selfish_mining}. In the simplest version of this attack, a malicious agent
-sends some transaction to the network to reap an off-chain benefit (say she sells a large
-amount of her on-chain assets on an exchange), and then releases a side-chain in which
-that transaction never occurred. If this side-chain becomes the main-chain, she has 
+The \textit{double-spend attack} is the well-known, but somewhat poorly named, ``51\% attack'' \cite{selfish_mining}. In the simplest version of this attack, a malicious agent sends some transaction to the network to reap an off-chain benefit (say she sells a large amount of her on-chain assets on an exchange), and then releases a side-chain in which that transaction never occurred. If this side-chain becomes the main-chain, she has 
 exploited the network.
 
-Large parts of the protocol were designed with the specific idea of frustrating
-this attack. The interleaving of PoW and PoS blocks serves to make this attack much harder to launch.
+Large parts of the protocol were designed with the specific goal of frustrating this attack. The interleaving of PoW and PoS blocks serves to make this attack much harder to launch.
 
-We model this attack by letting the average difficulty of PoW blocks on the chain
-be $d_w$, and the average difficulty of PoS blocks $d_s$.
-We let the attacker have $k$ times the hashpower and $l$ times
-the stake of the honest block producers on the network. Once the difficulty has adjusted on the
-attacker's side-chain, she will be producing PoW blocks of average difficulty $kd_w$, and PoS
-blocks of average difficulty $ld_s$. She should expect to win if her chain grows heavier 
-than the honest-chain in the long-run. Mathematically, this means she needs
-$$kd_w + ld_s > d_w + d_s$$
+We model this attack by letting the average difficulty of PoW blocks on the chain be $d_w$, and the average difficulty of PoS blocks $d_s$. We let the attacker have $k$ times the hashpower and $l$ times the stake of the honest block producers on the network. Once the difficulty has adjusted on the attacker's side-chain, she will be producing PoW blocks of average difficulty $kd_w$, and PoS blocks of average difficulty $ld_s$. She should expect to win if her chain grows heavier 
+than the honest-chain in the long-run. Mathematically, this means she needs $$kd_w + ld_s > d_w + d_s$$
 
-We can easily observe that if $k < 1$ and $l < 1$, the attacker is not expected to win, and
-if \textit {both} $k>1$ and $l>1$, the attacker is always expected to win.
-Therefore, 51\% of at least one
-domain is necessary to expect to win,
-and 51\% of both is sufficient to expect to win. 
+We can easily observe that if $k < 1$ and $l < 1$, the attacker is not expected to win, and if \textit {both} $k>1$ and $l>1$, the attacker is always expected to win. Therefore, 51\% of at least one
+domain is necessary to expect to win, and 51\% of both is sufficient to expect to win. 
 
-The intermediate case is when the attacker has a majority of one domain,
-but not the other. We let the attacker have $k>1$ and $l<1$ (the other case
-is symmetric). We can rewrite the winning condition as 
+The intermediate case is when the attacker has a majority of one domain, but not the other. We let the attacker have $k>1$ and $l<1$ (the other case is symmetric). We can rewrite the winning condition as 
 $$k > 1 + (1-l)\frac{d_s}{d_w}$$
 
-Note that the difficulty values $d_w$ and $d_s$ are just indications
-of how hard it was to produce a block, and therefore can be controlled to some
-extent by the designers of a protocol. This gives us
-the nice property that by manipulating these difficulty values, 
-we can make the attack harder to launch in one direction than the other. On the OAN,
-for instance, we believe that it will be easier for attackers to acquire a majority of the
-hash power ($k > 1$) than a majority of the stake. Accordingly, we set the typical
-$d_s$ to be several orders of magnitude larger than $d_w$ (roughly $10^{14}$ times
-larger). The result is that an attacker with, say, 9/10ths the stake of the
-honest network still needs to have over $10^{10}$ times as much hash power as the honest
-work. The converse effect is that an attacker with a majority of the stake needs
-very little hash power to dominate the network, but we believe acquiring a majority
-of the stake to be infeasibly difficulty.
+Note that the difficulty values $d_w$ and $d_s$ are just indications of how hard it was to produce a block, and therefore can be controlled to some extent by the designers of a protocol. This gives us
+the nice property that by manipulating these difficulty values, we can make the attack harder to launch in one direction than the other. On the OAN, for instance, we believe that it will be easier for attackers to acquire a majority of the hash power ($k > 1$) than a majority of the stake. Accordingly, we set the typical
+$d_s$ to be several orders of magnitude larger than $d_w$ (roughly $10^{14}$ times larger). The result is that an attacker with, say, 9/10ths the stake of the honest network still needs to have over $10^{10}$ times as much hash power as the honest work. The converse effect is that an attacker with a majority of the stake needs very little hash power to dominate the network, but we believe acquiring a majority of the stake to be infeasibly difficult.
 
 \subsection{Nothing-at-Stake}
 
-The  \textit{Nothing-at-Stake} problem arises in pure PoS blockchains when stakers
-try to produce blocks on every branch they see \cite{brown2018formal}. Since there
-is no cost to PoS block production, this is a profit-maximising strategy for PoS block
-forgers. This can lead to a fragile network with many branches and side-chains. 
+The  \textit{Nothing-at-Stake} problem arises in pure PoS blockchains when stakers try to produce blocks on every branch they see \cite{brown2018formal}. Since there is no cost to PoS block production, this is a profit-maximising strategy for PoS block forgers. This can lead to a fragile network with many branches and side-chains. 
 
-Our protocol is not susceptible to this problem since the miners will resolve the 
-branch; of several valid PoS blocks at the same level, whichever one has a PoW block
-built on top of it first will likely be included into the canonical chain.
+Our protocol is not susceptible to this problem since the miners will resolve the branch; of several valid PoS blocks at the same level, whichever one has a PoW block built on top of it first will likely be included into the canonical chain.
 
 \subsection{Stake Grinding}
 
-A PoS block producer is said to be \textit{stake grinding} if, in the production of
-a block, they can somehow increase the chances that they produce the next block too
-\cite{buterin_randomness}. In our protocol, the randomness that determines block production is entirely
-determined by the seed of the previous PoS block, and the private key of the block producer
-\S\ref{pos_block_generation}.
+A PoS block producer is said to be \textit{stake grinding} if, in the production of a block, they can somehow increase the chances that they produce the next block too \cite{buterin_randomness}. In our protocol, the randomness that determines block production is entirely determined by the seed of the previous PoS block, and the private key of the block producer \S\ref{pos_block_generation}.
 
-At every block an attacker will try to brute force compute an account that generates a lower delta
-for the next $k$ blocks, then attempt to transfer ownership of coins over to that account. Under our model
-the only way to achieve this is through unlocking then locking one's coins under such an account.
-Suppose that this would be done instantaneously, then the attacker could wait until $seed_{n-1}$ and
-simultaneously bet that he or she can win the next block honestly $seed_n$ \textit{and} compute
-the account that generates a lower delta given $seed_n$. However, notice that the attacker must
-at least win 1 block for this attack to work. Therefore, if we enforce a lockout period of $x$,
-the attacker must now win at least $x+1$ blocks consecutively the probability of
-success for such an attack translates to,
+At every block an attacker will try to brute force compute an account that generates a lower delta for the next $k$ blocks, then attempt to transfer ownership of coins over to that account. The attack would proceed as follows: assume the attacker knows that they can produce block $n$. In the time that the attacker has before he has to announce his block ($\Delta$), the attacker can select an account (via time-bounded brute-force search) which minimizes the $\Delta$ for the next PoS block. The attacker then includes a transaction into block $n$ which transfers the attacker's stake to the selected account. When it's time to produce the next block, assuming the attacker has the smallest $\Delta$ and is the block producer at this round as well, the attacker repeats this behavior as long as they can sustain this \emph{streak} of discovering favorable accounts which yield small $\Delta$s. 
+
+Notice that this attack is made feasible by the instantaneous transfer of stake from one account to another. Therefore, if we enforce a lockout period (of $x$ blocks) before a staker is allowed to transfer stake to another account, the attacker must now win at-least $x+1$ blocks consecutively under the same account in order to successfully launch this attack. Therefore, the probability of success of the stake grinding attack can be reduced to the probability for an honest staker of winning $x+1$ blocks consecutively.
+
+Let $s_i$ denote the absolute stake controlled by the $i$th staker and let $p_i$ denote the probability that the next block is proposed by the $i$th staker. It is easy to see that for PoS blocks, the probability of winning the next block for an honest staker is denoted by: 
+
+$$p_i=s_{i}/\sum_i{s_i}$$
+
+Assuming that $\sum_i{s_i}$ is constant for the next $x$ blocks, it follows that the $i$th staker's probability of winning $x+1$ blocks consecutively is denoted by
 
 \begin{equation}
     \label{eq:attacker_success}
-    \mathbb{P}(\texttt{win x + 1 consecutive blocks})=p^{x+1}
+    P(\texttt{wining x consecutive blocks})=p_i^{x}
 \end{equation}
 
-Where $p$ is the probability of success, therefore $p=s_{i}/\sum_i{s_i}$ (the probability of winning
-the next block), assuming that $\sum_i{s_i}$ is constant for the next $x$ blocks.
+This equation implies that the probability that an honest staker can produce $x$ consecutive blocks diminishes by a factor of $p_i$ for each incremental increase in $x$. 
 
 \subsection{Denial of Service}
 
-Since our protocol strictly interleaves PoW and PoS blocks, the network stalls if miners 
-or stakers do not produce a block for some reason. This is a concern, but it is not 
-significantly worse than a pure PoW network. 
+Since our protocol strictly interleaves PoW and PoS blocks, the network stalls if miners or stakers do not produce a block for some reason. This is a concern, but it is not significantly worse than a pure PoW network. 
 
 \subsection{Selfish Mining}
 
-The problem of \textit{selfish mining} in pure PoW networks is that miners who
-adopt this strategy hold onto blocks, mining from an advantageous position \cite{selfish_mining}.
-This is done until such a point that the network catches up, in which case they
-will produce their chain. The net effect of this is in deliberately rendering
-the work of the honest workers wasted, thus netting the miner a block production
-rate disproportionate to their actual mining power. Our protocol does not suffer from this
-problem specifically, as mining and staking blocks must be interleaved.
+The problem of \textit{selfish mining} in pure PoW networks is that miners who adopt this strategy hold onto blocks, mining from an advantageous position \cite{selfish_mining}. This is done until such a point that the network catches up to them, at which point, they publish their chain. This strategy wastes the efforts (work) of honest miners, thus netting the attacker a block production rate disproportionate to their actual mining power. Our protocol does not suffer from this problem specifically, since mining and staking blocks must be interleaved.
 
-There is, however, a similar problem that our protocol is vulnerable to. A staker can collude 
-with a miner by sending the miner a PoS block before the waiting time has elapsed.
-This miner now gets a head start on mining a PoW block on top of it. This costs the staker
-nothing (since she can still release her block to the wider network when it becomes
-eligible). It does give the miner the chance to win more of the blocks than their
-share of the hash power.
+There is, however, a similar problem that our protocol is vulnerable to. A staker can collude with a miner by sending the miner a PoS block before the waiting time has elapsed. This miner now gets a head start on mining a PoW block on top of it. This costs the staker nothing (since she can still release her block to the wider network when it becomes eligible). It does give the miner the chance to win more of the blocks than their share of the hash power. Further analysis is required to define the bounds around the advantage a miner can achieve by participating in such a scheme.  
 

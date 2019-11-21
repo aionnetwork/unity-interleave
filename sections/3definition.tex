@@ -1,8 +1,6 @@
 \section{Protocol Description}
 \label{unity}
 
-% -----------------------------------------------------
-
 We keep and maintain the notion of difficulty provided by Proof of Work, as well as the general goal of the consensus protocol, which is agreement on canonical ordering of blocks. We introduce an alternative block generation scheme utilizing \textbf{stake} or \textbf{voting power} while maintaining the constructs own notion of difficulty. To facilitate this, we introduce a mechanism to obtain \textbf{stake} in the network by locking up network currency associated with each account. To maintain a split between the two types of blocks, we introduce a new rule that enforces the \textit{interleaving} behaviour, in that blocks must reference a parent of the opposing type. Finally, we introduce a fork choice rule that determines agreement on a canonical chain based upon an intermediate unit derived from the difficulty of both block generation algorithms. We show that this approach leads to an increase in security against certain attacks \S\ref{analysis}.
 
 In order to forge a PoS block, a staker must have already registered some stake in a previous block. The exact mechanism of how stake is registered is an implementation detail; for a summary of how the Open Application Network manages staking, see \cite{unity_design_spec}, and \S\ref{staking_mechanism} for a very brief overview. A PoS block has some waiting time associated with it, and will only be accepted by the network once this wait time has elapsed (measured from the parent PoW block). Every staker has a random wait time calculated for each block they try to produce; however, the expected wait time is inversely proportional to the amount a staker has staked. In short, the more one stakes, the less their wait times are expected to be. The percentage of blocks a staker should expect to win is their percentage of the total stake in the network.
@@ -15,21 +13,21 @@ Staking in this context refers to \textbf{locking} ones assets in return for vot
 \subsection{PoW Block Generation}
 \label{pow_block_generation}
 
-We start by describing how blocks are produced in the protocol. Miners performing Proof of Work to generate the next block use a scheme similar to that introduced in \cite{wood2014ethereum}. Assume a mining difficulty parameter, miners solve the following cryptographic puzzle,
+Miners performing Proof of Work to generate the next block use a scheme similar to the introduced by Nakamoto in \cite{nakamoto2008}. Assuming a mining difficulty parameter ($d_w$), miners solve the following cryptographic puzzle,
 
 \begin{equation}
 \label{eq:pow_puzzle_equation}
 H(b) \leq 2^{256} / d_w.
 \end{equation}
 
-Where $H()$ is a deterministic random oracle that returns a random number in $\mathbb{N}_{256}$, given a random byte array $b$ as the input, we refer to $b$ as the nonce. As the cryptographic puzzle is independent of any miner, the probability of a miner mining a block is proportional to the number of permutations a user can to evaluate, its computational power. $d_w$ is a parameter by which the network can stabilize the network in the presence of an unknown hash rate, see \S\ref{difficulty_adjustment}.
+The hash function ($H()$) is a deterministic random oracle that returns a random number in $N_{256}$, given an arbitrary byte array $b$ as input ($b$ is usually referred to as the \textit{nonce}). As the cryptographic puzzle is independent of any miner, the probability of a miner proposing a block is proportional to their computational power (number of permutations of $H()$ the miner can evaluate per unit time). The difficulty parameter ($d_w$) is used by the network to stabilize it's block production rate in the presence of dynamic hash power (see \S\ref{difficulty_adjustment}).
 
 \subsection{PoS Block Generation}
 \label{pos_block_generation}
 
 The generation of PoS blocks is largely based on the Nxt forging algorithm \cite{popov2016probabilistic}. 
 
-A PoS block has a new field called a \emph{seed}. A PoS block's seed is based on the seed of the previous PoS block in the chain, which is always the block's grandparent. To determine the seed of block $n + 2$, a staker uses her secret key to sign the seed of block $n$.
+A PoS block has a field called \emph{seed}. A PoS block's seed is based on the seed of the previous PoS block in the chain, which is always the block's grandparent. The seed of block $n + 2$ is the block producer's signature upon the seed of block $n$ (i.e. in order to produce block $n+2$, the staker must obtain the seed for this block by signing the seed of the last PoS block (block $n$)).  
 
 Any time a staker is trying to produce a PoS block, there is a certain waiting time that must elapse before the block is valid. This wait time is measured from the timestamp of the parent block. The wait time is determined by three factors: the new block's seed, $s$, the staker's total stake, $V$, and the difficulty of the block, $d_s$. The difficulty is calculated as described in \S\ref{difficulty_adjustment}. The wait time, $\Delta$, is inversely proportional to $V$, and directly proportional to $d_s$. The seed, $s$, provides some randomness to this calculation. We calculate the wait time as,
 
@@ -37,12 +35,13 @@ $$\Delta = \frac{d_s \cdot \log (\frac{2^{256}}{H(s)})}{V},$$
 
 where $H$ is some hash function producing a 256-bit output.
 
-The timestamp of a PoS block should always be equal to the parent block's timestamp plus this $\Delta$. Honest nodes should reject blocks with timestamps that are greater than their system time, and should thus only accept PoS blocks once the waiting time has elapsed.
+The timestamp of a PoS block must be greater than or equal to the parent block's timestamp plus this $\Delta$. Honest nodes should thus only accept PoS blocks once the waiting time has elapsed .Further more, honest nodes must reject blocks with timestamps that are greater than their system time, so as to not accept block \emph{in the future}.  
+
 
 \subsection{Fork choice rule}
 \label{fork}
 
-The \emph{fork choice rule} is the aspect of a consensus protocol that decides between two or more chains of valid blocks to decide what the ``canonical'' chain or ``main'' chain is. The fork choice rule for the protocol is to always choose the chain that maximises total difficulty, where total difficulty is simply the sum of the difficulties of all the blocks in the chain. Therefore, given a set of chains $D$, denote $td_{s, d_i}$ and $td_{w, d_i}$ to be the total staking and working difficulty for the $i$th chain. We recognize the main chain as the one that has in its prefix the genesis block, and that satisfies,
+The \emph{fork choice rule} is the aspect of a consensus protocol that decides between two or more chains of valid blocks to decide what the ``canonical'' chain or ``main'' chain is. The fork choice rule for the protocol is to always choose the chain that maximises total difficulty, where total difficulty is simply the sum of the difficulties of all the blocks in the chain. Therefore, given a set of chains $D$, we denote the $i$th chain as $d_i$, and we denote $td_{s, d_i}$ and $td_{w, d_i}$ to be the total staking and work difficulties (respectively) for the $i$th chain. We recognize the main chain as the one that has in its prefix the genesis block, and that satisfies,
 
 \begin{equation}
     M = \{td_{s, d_i} + td_{w, d_i} > td_{s, d_j} + td_{w, d_j} \forall j \neq i | d_i \in D \}
@@ -53,11 +52,7 @@ In \S\ref{double_spend_attack} we examine why this fork choice rule is beneficia
 \subsection{Difficulty Adjustment}
 \label{difficulty_adjustment}
 
-We begin with the presumption that block arrival times for fast acting difficulty adjustment algorithms can be modelled using an exponential distribution, this is not true in the case of a blockchain with a lagging difficulty adjustment algorithm such as Bitcoin \cite{block_arrivals}. In case of PoW, the rate of the exponential distribution $\lambda_w$ is equal to $r/d_w$, where $r$ is the total hash rate of the network and $d_w$ is the mining difficulty; in PoS, the rate $\lambda_s$ is equal to $b/d_s$, where $b$ is the total voting power of the network and $d_s$ is the staking difficulty.
-
-The goal of difficulty adjustment algorithm is to achieve a mean target block time of $t$. For a random variable $X \sim Exp(\lambda)$, the mean is $\lambda^{-1}$. Let $\lambda_w^{-1} = t$ and $\lambda_s^{-1} = t$, then $d_w = r \cdot t$ and $d_s = b \cdot t$. However, the network hash rate can not be determined by the protocol and changes frequently as miners come and go; the network stake can be calculated but the active stake is unknown due to some of the nodes being offline. Therefore, the difficulties can only be learned.
-
-In our protocol, a new algorithm is proposed based on our assumption around block arrival times. Given that $\Delta$ represents the block arrival delta,
+We begin with the presumption that block arrival times for fast acting difficulty adjustment algorithms can be modelled using an exponential distribution. Note that this is not true in the case of a blockchain with a lagging difficulty adjustment algorithm such as Bitcoin \cite{block_arrivals}. This difficulty algorithm is applied identically to all blocks in the chain (i.e. both PoW and PoS blocks). Given that $\Delta$ represents the block arrival rates, the difficulty of the ($n+1$)th block (denoted $d_{n+1}$) is related the to the difficulty of the $n$th block (denoted $d_n$) via:
 
 \begin{equation}
     d_{n+1} = \begin{cases}
@@ -74,6 +69,6 @@ Where $\lambda$ represents the rate parameter for an exponential distribution. T
     1-e^{(-\lambda x)}=0.5,
 \end{equation}
 
-where the left-hand side is the cumulative distribution function of an exponential random variable. Intuitively, this creates a negative feedback loop that stabilizes the system around 10 seconds. If the average difficulty is too high, it is reflected on average by an increase in block time, in which case the protocol responds by decreasing the difficulty. In the same vein, difficulty is adjusted upwards when the average block time is too low. Where equation \ref{eq:boundary} refers to the expected time in which half the blocks (on average) should have arrived at network steady state (see \S\ref{results} for definition).
+where the left-hand side is the cumulative distribution function (cdf) of an exponential random variable. Where equation \ref{eq:boundary} refers to the time at which the probability of a block arriving or having already arrived is half. To give an example, in the live network we design our expected block time to be centered at 10 seconds, therefore we design the boundary to target an exponential distribution with a mean of 10. This gives us $\lambda^{-1}=10$. Solving $x$ for such a lambda gives us a boundary time of $x \approx 6.9314$.
 
-%---------------------------------------------------------
+Intuitively, this creates a negative feedback loop that stabilizes the system around 10 seconds. If the average difficulty is too high, it is reflected in the system by an increase in block time (on average), in which case the protocol responds by decreasing the difficulty. In the same vein, difficulty is adjusted upwards when the average block time is too low.
